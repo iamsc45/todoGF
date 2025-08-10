@@ -676,6 +676,18 @@ body {
     color: #dc3545;
 }
 
+.action-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f5f5f5;
+    color: #999;
+}
+
+.action-btn.disabled:hover {
+    background-color: #f5f5f5;
+    transform: none;
+}
+
 .empty-state {
     text-align: center;
     padding: 60px 30px;

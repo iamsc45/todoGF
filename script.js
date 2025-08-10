@@ -290,20 +290,21 @@ class TodoApp {
 
     async loadTodos() {
         try {
-            const todosRef = ref(database, `todos/${this.userId}`);
+            // 공유 데이터베이스 경로 사용 (모든 사용자가 같은 할일 목록 공유)
+            const todosRef = ref(database, `todos`);
             const snapshot = await get(todosRef);
             
             if (snapshot.exists()) {
                 this.todos = snapshot.val();
             } else {
-                // Firebase에 데이터가 없으면 로컬 스토리지에서 로드
-                this.todos = JSON.parse(localStorage.getItem('todos')) || [];
+                // Firebase에 데이터가 없으면 빈 배열로 시작
+                this.todos = [];
             }
             
             this.render();
             this.updateStats();
             
-            // 실시간 동기화 설정
+            // 실시간 동기화 설정 (모든 사용자에게 실시간 업데이트)
             onValue(todosRef, (snapshot) => {
                 if (snapshot.exists()) {
                     this.todos = snapshot.val();
@@ -316,8 +317,8 @@ class TodoApp {
             
         } catch (error) {
             console.error('Firebase에서 데이터를 불러오는 중 오류:', error);
-            // 오류 시 로컬 스토리지에서 백업 데이터 로드
-            this.todos = JSON.parse(localStorage.getItem('todos')) || [];
+            // 오류 시 빈 배열로 시작
+            this.todos = [];
             this.render();
             this.updateStats();
         }
@@ -325,10 +326,11 @@ class TodoApp {
 
     async saveTodos() {
         try {
-            const todosRef = ref(database, `todos/${this.userId}`);
+            // 공유 데이터베이스 경로 사용
+            const todosRef = ref(database, `todos`);
             await set(todosRef, this.todos);
             
-            // 로컬 스토리지에도 백업 저장
+            // 로컬 스토리지에도 백업 저장 (공유 앱이므로 백업용)
             localStorage.setItem('todos', JSON.stringify(this.todos));
         } catch (error) {
             console.error('Firebase에 데이터를 저장하는 중 오류:', error);
@@ -384,6 +386,16 @@ class TodoApp {
     }
 
     async deleteTodo(id) {
+        const todo = this.todos.find(t => t.id === id);
+        if (!todo) return;
+
+        // 권한 확인: 자신이 작성한 할일만 삭제 가능
+        const currentUserUid = localStorage.getItem('userUid');
+        if (todo.author && todo.author.uid !== currentUserUid) {
+            alert('자신이 작성한 할일만 삭제할 수 있습니다.');
+            return;
+        }
+
         this.todos = this.todos.filter(t => t.id !== id);
         await this.saveTodos();
         this.render();
@@ -393,6 +405,13 @@ class TodoApp {
     async editTodo(id) {
         const todo = this.todos.find(t => t.id === id);
         if (!todo) return;
+
+        // 권한 확인: 자신이 작성한 할일만 수정 가능
+        const currentUserUid = localStorage.getItem('userUid');
+        if (todo.author && todo.author.uid !== currentUserUid) {
+            alert('자신이 작성한 할일만 수정할 수 있습니다.');
+            return;
+        }
 
         const newText = prompt('할일을 수정하세요:', todo.text);
         if (newText !== null && newText.trim() !== '') {
@@ -461,6 +480,12 @@ class TodoApp {
             `<span class="author-badge">👤 ${authorName}</span>` : 
             `<span class="author-badge anonymous">👤 ${authorName}</span>`;
 
+        // 권한 확인: 자신이 작성한 할일만 수정/삭제 가능
+        const currentUserUid = localStorage.getItem('userUid');
+        const canEdit = !todo.author || todo.author.uid === currentUserUid;
+        const editBtnClass = canEdit ? 'action-btn edit-btn' : 'action-btn edit-btn disabled';
+        const deleteBtnClass = canEdit ? 'action-btn delete-btn' : 'action-btn delete-btn disabled';
+
         return `
             <div class="todo-item ${todo.completed ? 'completed' : ''}" data-id="${todo.id}">
                 <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''}>
@@ -476,10 +501,10 @@ class TodoApp {
                     </div>
                 </div>
                 <div class="todo-actions">
-                    <button class="action-btn edit-btn" title="수정">
+                    <button class="${editBtnClass}" title="${canEdit ? '수정' : '수정 불가 (자신이 작성한 할일만 수정 가능)'}" ${!canEdit ? 'disabled' : ''}>
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="action-btn delete-btn" title="삭제">
+                    <button class="${deleteBtnClass}" title="${canEdit ? '삭제' : '삭제 불가 (자신이 작성한 할일만 삭제 가능)'}" ${!canEdit ? 'disabled' : ''}>
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
