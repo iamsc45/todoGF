@@ -1,16 +1,16 @@
 // Firebase 설정
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAALJgRcjN2mk-koQWfmc8owEUQTLphuSA",
-  authDomain: "todododo-117f6.firebaseapp.com",
-  databaseURL: "https://todododo-117f6-default-rtdb.firebaseio.com",
-  projectId: "todododo-117f6",
-  storageBucket: "todododo-117f6.firebasestorage.app",
-  messagingSenderId: "81439555995",
-  appId: "1:81439555995:web:a0f0b1ca6b4a434122a13e"
+  apiKey: "AIzaSyDfbFyvWTHP0LwxkALGsrG4vEvW-gkwpZY",
+  authDomain: "gf-to-do-list.firebaseapp.com",
+  databaseURL: "https://gf-to-do-list-default-rtdb.firebaseio.com/",
+  projectId: "gf-to-do-list",
+  storageBucket: "gf-to-do-list.firebasestorage.app",
+  messagingSenderId: "739611833036",
+  appId: "1:739611833036:web:08e19be1977f4142740869"
 };
 
 // Firebase 초기화
